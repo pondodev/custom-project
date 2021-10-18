@@ -65,6 +65,9 @@ void Engine::update( float delta_time ) {
         std::sin( player.view_angle - float(M_PI / 2.0) )
     };
 
+    player_move_dir_lock.lock();
+    player_view_lock.lock();
+
     // apply player movement
     auto old_pos = player.position;
     auto move_vec = forward * player.move_dir.y * delta_time;
@@ -84,6 +87,9 @@ void Engine::update( float delta_time ) {
         else wall_start -= 0.01;
         player.position.y += wall_start - player.position.y;
     }
+
+    player_move_dir_lock.unlock();
+    player_view_lock.unlock();
 }
 
 void Engine::render() {
@@ -195,11 +201,15 @@ void Engine::get_framebuffer( uint8_t* target ) {
 }
 
 void Engine::move_view( float delta ) {
+    player_view_lock.lock();
     player.view_angle += delta;
+    player_view_lock.unlock();
 }
 
 void Engine::set_player_move_dir( Vec2 dir ) {
+    player_move_dir_lock.lock();
     player.move_dir = dir;
+    player_move_dir_lock.unlock();
 }
 
 void Engine::draw_rect( int x, int y, int w, int h, Color color ) {

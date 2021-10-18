@@ -40,7 +40,6 @@ public:
 
 private:
     Color framebuffer[ FRAMEBUFFER_LENGTH ];
-    std::mutex framebuffer_lock;
     std::vector<MapTile> map;
     unsigned int map_width;
     unsigned int map_height;
@@ -49,6 +48,9 @@ private:
     Texture enemy_textures;
     std::vector<Enemy> enemies;
     std::array<float, WINDOW_WIDTH> depth_buffer;
+    std::mutex framebuffer_lock;
+    std::mutex player_view_lock;
+    std::mutex player_move_dir_lock;
 
     void clear_framebuffer( Color color );
     void draw_rect( int x, int y, int w, int h, Color color );
