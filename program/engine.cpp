@@ -87,6 +87,7 @@ void Engine::update( float delta_time ) {
 }
 
 void Engine::render() {
+    framebuffer_lock.lock();
     clear_framebuffer( Color( 0xBBBBBBFF ) );
 
     const size_t rect_w = WINDOW_WIDTH / (map_width * 2);
@@ -174,27 +175,13 @@ void Engine::render() {
         draw_rect( e.position.x * rect_w, e.position.y * rect_h, 5, 5, Color( 0xFF0000FF ) );
         draw_sprite( e );
     }
-}
 
-void Engine::draw_to_ppm( std::string path ) {
-    std::fstream f;
-    f.open( path, std::ios::out );
-
-    // header information
-    f << "P3\n" << WINDOW_WIDTH << " " << WINDOW_HEIGHT << "\n255\n";
-
-    for ( int i = 0; i < FRAMEBUFFER_LENGTH; i++ ) {
-        auto c = framebuffer[ i ];
-        uint8_t r, g, b, a;
-        c.get_components( r, g, b, a );
-
-        f << unsigned(r) << " " << unsigned(g) << " " << unsigned(b) << "\n";
-    }
-
-    f.close();
+    framebuffer_lock.unlock();
 }
 
 void Engine::get_framebuffer( uint8_t* target ) {
+    framebuffer_lock.lock();
+
     for ( int i = 0; i < FRAMEBUFFER_LENGTH; i++ ) {
         uint8_t r, g, b, a;
         framebuffer[ i ].get_components( r, g, b, a );
@@ -203,6 +190,8 @@ void Engine::get_framebuffer( uint8_t* target ) {
         target[ i * 4 + 2 ] = b;
         target[ i * 4 + 3 ] = a;
     }
+
+    framebuffer_lock.unlock();
 }
 
 void Engine::move_view( float delta ) {

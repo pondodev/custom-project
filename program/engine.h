@@ -13,6 +13,7 @@
 #include <cmath>
 #include <array>
 #include <algorithm>
+#include <mutex>
 
 #include "color.h"
 #include "player.h"
@@ -32,7 +33,6 @@ public:
     Engine( std::string map_path, std::string wall_tex_path, std::string enemy_tex_path );
     void update( float delta_time );
     void render();
-    void draw_to_ppm( std::string path );
     void get_framebuffer( uint8_t* target );
 
     void move_view( float delta );
@@ -40,6 +40,7 @@ public:
 
 private:
     Color framebuffer[ FRAMEBUFFER_LENGTH ];
+    std::mutex framebuffer_lock;
     std::vector<MapTile> map;
     unsigned int map_width;
     unsigned int map_height;

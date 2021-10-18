@@ -24,15 +24,23 @@ int main() {
     render_sprite = sf::Sprite( render_texture );
     render_sprite.setScale( 1.5, 1.5 );
 
+    std::thread logic_thread( logic_loop );
+
     while ( window->isOpen() ) {
         input();
-        update();
         draw();
     }
 
+    logic_thread.join();
     delete window;
 
     return 0;
+}
+
+void logic_loop() {
+    while ( window->isOpen() ) {
+        update();
+    }
 }
 
 void input() {
