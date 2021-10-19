@@ -49,7 +49,7 @@ Engine::Engine( std::string map_path, std::string wall_tex_path, std::string ene
 
     enemies = {
         Enemy { Vec2 { 4.0, 8.5 }, 2 },
-        Enemy { Vec2 { 2.5, 9.0 }, 0 },
+        Enemy { Vec2 { 2.5, 9.0 }, 1 },
         Enemy { Vec2 { 5.0, 10.0 }, 0 },
         Enemy { Vec2 { 5.5, 9.0 }, 0 }
     };

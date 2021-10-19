@@ -1,6 +1,6 @@
 #include "main.h"
 
-Engine engine( "map.txt", "walltext.png", "monsters.png" );
+Engine engine( "assets/map.txt", "assets/walls.png", "assets/enemies.png" );
 sf::RenderWindow* window;
 sf::Vector2i window_center;
 sf::Texture render_texture;

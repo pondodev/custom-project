@@ -10,6 +10,7 @@ Texture::Texture( std::string path ) {
     }
 
     if ( nchannels != 4 ) {
+        std::cerr << "error loading " << path << ": ";
         std::cerr << "texture must be a 32 bit image" << std::endl;
         stbi_image_free( pixmap );
     }
@@ -17,6 +18,7 @@ Texture::Texture( std::string path ) {
     count = w / h;
     size = w / count;
     if ( w != h * int(count) ) {
+        std::cerr << "error loading " << path << ": ";
         std::cerr << "the texture file must contain N square textures packed horizontally" << std::endl;
     }
 
