@@ -19,11 +19,53 @@
 \pagebreak
 
 \section{Introduction}
-% provide background of the project, why it exists, and what i aim to achieve
 \subsection{Background}
+Computers are incredible and complicated these days, with many components that
+allow for the more efficient and effective computation of various tasks. For me
+personally, by far the most interesting modern day development (which many will
+actually take for granted) is the humble GPU. Short for graphics processing
+unit, it is a core aspect to any computer whether it is pushing hyper-realistic
+game graphics or displaying the words on your social media feeds. These GPUs
+differ greatly from the CPU which many view as the beating heart of any
+computer. CPUs have been designed to be more general purpose, allowing for
+operations such as logical branching, maths, and bitwise magic. GPUs on the
+other hand are entirely focused on floating point maths operations, and have
+been architected to be able to do those rapidly and in parallel. This means
+modern day graphics requirements, such as being able to independently address
+one of the literal millions of pixels on your screen (a standard 1080p screen
+contains a little over 2 million pixels!), is now a trivial task that can be
+completed with great speed.
 
-% speak about the project at a high level (more detail in the next section)
+Computers haven't always been like this however, and many moons ago we would
+have required the CPU to perform all of the logical and graphical work of a
+computer. This complicated matters greatly as soon as you wanted to display
+complex graphics, and it only got worse if you wanted to display complex
+graphics \textit{and} provide complex logic--such as in a game. It's for this
+reason that many games of yore have had to come up with some very clever
+techniques to "cheat" graphics. Most games for the longest time were purely 2D
+since that was about as much as we could reasonably handle with the hardware
+at the time. Before 3D accelerated technology hit the general consumer market,
+3D games were but a dream... Kind of.
+
+Enter the raycaster. There will be more later on about how it works and why it's
+so fast, but for now just know that raycasters were some of the earliest
+attempts at creating 3D graphics in games. Not to be confused with ray marching
+and ray tracing (two very cool 3D graphics techniques as well!), raycasters have
+a very distinct look to them that many will remember from the first Wolfenstein
+3D game. They tend to look very blocky, with billboarded sprites representing
+the entities within a scene. This technology forms the basis of my custom
+project.
+
 \subsection{The Project}
+At a high level, this project will take form of a first person shooter using
+3D raycaster graphics. The front end will use SFML to display the internal frame
+buffer as well as receive/process the window events. The back end will be far
+more complex, consisting of the actual raycasting engine, an ECS implementation
+for managing enemy entities, multi-threading to assist with performance, and
+some simple collision detection. The entire project has been written in C++
+within a Linux environment using the gcc toolchain, and borrows greatly both
+from Austin Morlan's writeup on ECS\footnote{https://austinmorlan.com/posts/entity\_component\_system/}
+and Dmitry V. Sokolov's tinyraycaster series of tutorials\footnote{https://github.com/ssloy/tinyraycaster/wiki/Part-0:-getting-started}.
 
 % now we get to talk about the fun stuff--how did i achieve everything?
 \section{Implementation}
