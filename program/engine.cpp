@@ -47,12 +47,10 @@ Engine::Engine( std::string map_path, std::string wall_tex_path, std::string ene
         M_PI / 3.0
     };
 
-    enemies = {
-        Enemy { Vec2 { 4.0, 8.5 }, 2 },
-        Enemy { Vec2 { 2.5, 9.0 }, 1 },
-        Enemy { Vec2 { 5.0, 10.0 }, 0 },
-        Enemy { Vec2 { 5.5, 9.0 }, 0 }
-    };
+    add_enemy( 4.0, 8.5, 1.0, EnemyType::HotHaw );
+    add_enemy( 2.5, 9.0, 1.0, EnemyType::FlushedHaw );
+    add_enemy( 5.0, 10.0, 1.0, EnemyType::YeeHaw );
+    add_enemy( 5.5, 9.0, 1.0, EnemyType::YeeHaw );
 }
 
 void Engine::update( float delta_time ) {
@@ -74,17 +72,18 @@ void Engine::update( float delta_time ) {
     move_vec += right * player.move_dir.x * delta_time;
     player.position += move_vec;
 
+    // TODO: we still get crashes from going inside of walls
     if ( get_map_tile( int(player.position.x), int(old_pos.y) ) != Floor ) {
         float wall_start = floor( player.position.x );
         if ( move_vec.x < float(0) ) wall_start += 1.0;
-        else wall_start -= 0.01;
+        else wall_start -= 0.05;
         player.position.x += wall_start - player.position.x;
     }
 
     if ( get_map_tile( int(old_pos.x), int(player.position.y) ) != Floor ) {
         float wall_start = floor( player.position.y );
         if ( move_vec.y < 0 ) wall_start += 1.0;
-        else wall_start -= 0.01;
+        else wall_start -= 0.05;
         player.position.y += wall_start - player.position.y;
     }
 
@@ -168,17 +167,25 @@ void Engine::render() {
     }
 
     // draw the enemies
-    for ( auto &e : enemies ) {
-        float enemy_dist = std::sqrt( pow( player.position.x - e.position.x, 2 ) + pow( player.position.y - e.position.y, 2 ) );
-        e.dist_from_player = enemy_dist;
+    // TODO: enemy movement system
+    for ( auto &e : active_enemies ) {
+        auto move_comp = enemy_manager.get_movement_component( e );
+        auto dist_comp = enemy_manager.get_distance_component( e );
+
+        float enemy_dist = std::sqrt( pow( player.position.x - move_comp->x, 2 ) + pow( player.position.y - move_comp->y, 2 ) );
+        dist_comp->distance = enemy_dist;
     }
 
-    std::sort( enemies.begin(), enemies.end(), []( Enemy a, Enemy b ) {
-        return a.dist_from_player > b.dist_from_player;
-    } );
+    std::sort( active_enemies.begin(), active_enemies.end(),
+        [this]( Entity a, Entity b ) {
+            auto a_dist = enemy_manager.get_distance_component( a );
+            auto b_dist = enemy_manager.get_distance_component( b );
+            return a_dist->distance > b_dist->distance;
+        } );
 
-    for ( auto e : enemies ) {
-        draw_rect( e.position.x * rect_w, e.position.y * rect_h, 5, 5, Color( 0xFF0000FF ) );
+    for ( auto e : active_enemies ) {
+        auto move_comp = enemy_manager.get_movement_component( e );
+        draw_rect( move_comp->x * rect_w, move_comp->y * rect_h, 5, 5, Color( 0xFF0000FF ) );
         draw_sprite( e );
     }
 
@@ -222,22 +229,26 @@ void Engine::draw_rect( int x, int y, int w, int h, Color color ) {
     }
 }
 
-void Engine::draw_sprite( Enemy enemy ) {
-    float dir = atan2( enemy.position.y - player.position.y, enemy.position.x - player.position.x );
+void Engine::draw_sprite( Entity enemy ) {
+    auto move_comp = enemy_manager.get_movement_component( enemy );
+    auto dist_comp = enemy_manager.get_distance_component( enemy );
+    auto type_comp = enemy_manager.get_enemy_type_component( enemy );
+
+    float dir = atan2( move_comp->y - player.position.y, move_comp->x - player.position.x );
     while ( dir - player.view_angle > M_PI ) dir -= 2 * M_PI;
     while ( dir - player.view_angle < -M_PI ) dir += 2 * M_PI;
 
-    size_t sprite_size = std::min( 1000, static_cast<int>( WINDOW_HEIGHT / enemy.dist_from_player ) );
+    size_t sprite_size = std::min( 1000, static_cast<int>( WINDOW_HEIGHT / dist_comp->distance ) );
     int h_offset = (dir - player.view_angle) / player.fov * (WINDOW_WIDTH / 2) + (WINDOW_WIDTH / 4) - (enemy_textures.get_size() / 2);
     h_offset -= sprite_size / 2; // center the sprite
     int v_offset = WINDOW_HEIGHT / 2 - sprite_size / 2;
 
     for ( size_t i = 0; i < sprite_size; i++ ) {
         if ( h_offset + int(i) < 0 || h_offset + i >= WINDOW_WIDTH / 2 ) continue;
-        if ( depth_buffer[ h_offset + i ] < enemy.dist_from_player ) continue; // occlude sprite
+        if ( depth_buffer[ h_offset + i ] < dist_comp->distance ) continue; // occlude sprite
         for ( size_t j = 0; j < sprite_size; j++ ) {
             if ( v_offset + int(j) < 0 || v_offset + j >= WINDOW_HEIGHT ) continue;
-            auto col = enemy_textures.get_pixel( i * enemy_textures.get_size() / sprite_size, j * enemy_textures.get_size() / sprite_size, enemy.tex_id );
+            auto col = enemy_textures.get_pixel( i * enemy_textures.get_size() / sprite_size, j * enemy_textures.get_size() / sprite_size, type_comp->type );
             if ( (col.get_hex() & 0x000000FF) < 0x00000080 ) continue; // very simple alpha culling
             int x, y;
             x = WINDOW_WIDTH / 2 + h_offset + i;
@@ -257,4 +268,18 @@ void Engine::draw_pixel( int x, int y, Color color ) {
 
 MapTile Engine::get_map_tile( int x, int y ) {
     return map[ x + y * map_width ];
+}
+
+void Engine::add_enemy( float x, float y, float speed, EnemyType type ) {
+    auto id = enemy_manager.register_entity();
+    if ( id.has_value() ) {
+        auto id_val = id.value();
+        auto move_comp = enemy_manager.get_movement_component( id_val );
+        auto type_comp = enemy_manager.get_enemy_type_component( id_val );
+
+        *move_comp = { x, y };
+        *type_comp = { type };
+
+        active_enemies.push_back( id.value() );
+    }
 }

@@ -17,8 +17,8 @@
 
 #include "color.h"
 #include "player.h"
-#include "enemy.h"
 #include "texture.h"
+#include "entity_engine.h"
 
 enum MapTile {
     Floor = -1,
@@ -46,18 +46,21 @@ private:
     Player player;
     Texture wall_textures;
     Texture enemy_textures;
-    std::vector<Enemy> enemies;
+    EntityEngine enemy_manager;
+    std::vector<Entity> active_enemies;
     std::array<float, WINDOW_WIDTH> depth_buffer;
+
     std::mutex framebuffer_lock;
     std::mutex player_view_lock;
     std::mutex player_move_dir_lock;
 
     void clear_framebuffer( Color color );
     void draw_rect( int x, int y, int w, int h, Color color );
-    void draw_sprite( Enemy enemy );
+    void draw_sprite( Entity enemy );
     void draw_pixel( int x, int y, Color color );
 
     MapTile get_map_tile( int x, int y );
+    void add_enemy( float x, float y, float speed, EnemyType type );
 };
 
 #endif
