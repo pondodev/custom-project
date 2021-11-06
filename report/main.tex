@@ -67,12 +67,38 @@ within a Linux environment using the gcc toolchain, and borrows greatly both
 from Austin Morlan's writeup on ECS\footnote{https://austinmorlan.com/posts/entity\_component\_system/}
 and Dmitry V. Sokolov's tinyraycaster series of tutorials\footnote{https://github.com/ssloy/tinyraycaster/wiki/Part-0:-getting-started}.
 
-% now we get to talk about the fun stuff--how did i achieve everything?
 \section{Implementation}
 
-% talk about sfml, why did i choose it, and why it might not be a perfect choice
-% probably talk about why it might have been a better idea to do it in raw gl
 \subsection{Front End}
+The bulk of the front end in this project is handled by the Simple and Fast
+Multimedia Library, or SFML for short. SFML is similar to SDL in a variety of
+ways--both have many useful abstractions of low level graphics, image handling,
+audio processing, etc. There are some key differences between the two however:
+
+\begin{itemize}
+    \item SDL has a very C style design and API, while SFML's design and API are
+          much more like C++
+    \item SFML's abstractions tend to be easier to work with due to it's object
+          oriented nature
+    \item SDL's graphics abstractions are fairly limited, only allowing for
+          simple quads and textures while SFML has more primitives and a simple
+          shader pipeline
+    \item SFML just generally has less boilerplate code than SDL
+\end{itemize}
+
+All of the above ultimately influenced my decision to choose SFML over SDL as
+we had been using for all of our previous tasks throughout the unit. Add to this
+that it has a very sensible system for event polling that is similar (though in
+my opinion, slightly better) to SDL's own event system, and it just made sense
+for the purposes of my project.
+
+There is another option however, one that I think might have made more sense for
+this project actually: raw OpenGL. It's a scary prospect, for sure, but there's
+a big benefit in the form of performance that we would have gained. There is of
+course some added complexity that would come from this since we're essentially
+working with little to no abstractions. However, considering that there isn't
+much we need from SFML outside of the events system and drawing textures to a
+quad, it would have been decently trivial to make the change over to raw OpenGL.
 
 % the actual meat of the project, so go into lots of detail here!
 \subsection{Back End}
