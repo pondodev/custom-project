@@ -89,6 +89,8 @@ void Engine::update( float delta_time ) {
 
     player_move_dir_lock.unlock();
     player_view_lock.unlock();
+
+    enemy_movement_system( delta_time );
 }
 
 void Engine::render() {
@@ -167,8 +169,7 @@ void Engine::render() {
     }
 
     // draw the enemies
-    // TODO: enemy movement system
-    for ( auto &e : active_enemies ) {
+    for ( auto& e : active_enemies ) {
         auto move_comp = enemy_manager.get_movement_component( e );
         auto dist_comp = enemy_manager.get_distance_component( e );
 
@@ -183,7 +184,7 @@ void Engine::render() {
             return a_dist->distance > b_dist->distance;
         } );
 
-    for ( auto e : active_enemies ) {
+    for ( auto& e : active_enemies ) {
         auto move_comp = enemy_manager.get_movement_component( e );
         draw_rect( move_comp->x * rect_w, move_comp->y * rect_h, 5, 5, Color( 0xFF0000FF ) );
         draw_sprite( e );
@@ -277,9 +278,17 @@ void Engine::add_enemy( float x, float y, float speed, EnemyType type ) {
         auto move_comp = enemy_manager.get_movement_component( id_val );
         auto type_comp = enemy_manager.get_enemy_type_component( id_val );
 
-        *move_comp = { x, y };
+        *move_comp = { x, y, speed };
         *type_comp = { type };
 
         active_enemies.push_back( id.value() );
+    }
+}
+
+void Engine::enemy_movement_system( float delta_time ) {
+    for ( auto& e : active_enemies ) {
+        auto move_comp = enemy_manager.get_movement_component( e );
+        move_comp->x += move_comp->speed * delta_time;
+        move_comp->y += move_comp->speed * delta_time;
     }
 }

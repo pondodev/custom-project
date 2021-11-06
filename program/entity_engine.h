@@ -24,9 +24,9 @@ public:
 
 private:
     std::queue<Entity> available_ids;
-    MovementComponent movement_components[ MAX_ENTITIES ];
-    EnemyTypeComponent enemy_type_components[ MAX_ENTITIES ];
-    DistanceComponent distance_components[ MAX_ENTITIES ];
+    MovementComponent* movement_components;
+    EnemyTypeComponent* enemy_type_components;
+    DistanceComponent* distance_components;
 };
 
 #endif

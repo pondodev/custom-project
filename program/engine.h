@@ -61,6 +61,7 @@ private:
 
     MapTile get_map_tile( int x, int y );
     void add_enemy( float x, float y, float speed, EnemyType type );
+    void enemy_movement_system( float delta_time );
 };
 
 #endif

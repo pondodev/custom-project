@@ -4,10 +4,16 @@ EntityEngine::EntityEngine() {
     for ( size_t i = 0; i < MAX_ENTITIES; i++ ) {
         available_ids.push( i );
     }
+
+    movement_components = new MovementComponent[ MAX_ENTITIES ];
+    enemy_type_components = new EnemyTypeComponent[ MAX_ENTITIES ];
+    distance_components = new DistanceComponent[ MAX_ENTITIES ];
 }
 
 EntityEngine::~EntityEngine() {
-    // TODO: destroy all the things !!
+    delete [] movement_components;
+    delete [] enemy_type_components;
+    delete [] distance_components;
 }
 
 std::optional<Entity> EntityEngine::register_entity() {
