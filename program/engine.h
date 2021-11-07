@@ -30,13 +30,13 @@ enum MapTile {
 
 class Engine {
 public:
-    Engine( std::string map_path, std::string wall_tex_path, std::string enemy_tex_path );
-    void update( float delta_time );
+    Engine( const std::string map_path, const std::string wall_tex_path, const std::string enemy_tex_path );
+    void update( const float delta_time );
     void render();
     void get_framebuffer( uint8_t* target );
 
-    void move_view( float delta );
-    void set_player_move_dir( Vec2 dir );
+    void move_view( const float delta );
+    void set_player_move_dir( const Vec2 dir );
 
 private:
     Color framebuffer[ FRAMEBUFFER_LENGTH ];
@@ -54,14 +54,14 @@ private:
     std::mutex player_view_lock;
     std::mutex player_move_dir_lock;
 
-    void clear_framebuffer( Color color );
-    void draw_rect( int x, int y, int w, int h, Color color );
-    void draw_sprite( Entity enemy );
-    void draw_pixel( int x, int y, Color color );
+    void clear_framebuffer( const Color color );
+    void draw_rect( const int x, const int y, const int w, const int h, const Color color );
+    void draw_sprite( const Entity enemy );
+    void draw_pixel( const int x, const int y, const Color color );
 
-    MapTile get_map_tile( int x, int y );
-    void add_enemy( float x, float y, float speed, EnemyType type );
-    void enemy_movement_system( float delta_time );
+    MapTile get_map_tile( const int x, const int y ) const;
+    void add_enemy( const float x, const float y, const float speed, const EnemyType type );
+    void enemy_movement_system( const float delta_time );
 };
 
 #endif

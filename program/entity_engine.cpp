@@ -35,18 +35,18 @@ std::optional<Entity> EntityEngine::register_entity() {
     return to_return;
 }
 
-void EntityEngine::unregister_entity( Entity id ) {
+void EntityEngine::unregister_entity( const Entity id ) {
     available_ids.push( id );
 }
 
-MovementComponent* EntityEngine::get_movement_component( Entity id ) {
+MovementComponent* EntityEngine::get_movement_component( const Entity id ) const {
     return &movement_components[ id ];
 }
 
-EnemyTypeComponent* EntityEngine::get_enemy_type_component( Entity id ) {
+EnemyTypeComponent* EntityEngine::get_enemy_type_component( const Entity id ) const {
     return &enemy_type_components[ id ];
 }
 
-DistanceComponent* EntityEngine::get_distance_component( Entity id ) {
+DistanceComponent* EntityEngine::get_distance_component( const Entity id ) const {
     return &distance_components[ id ];
 }

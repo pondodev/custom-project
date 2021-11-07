@@ -16,11 +16,11 @@ public:
     ~EntityEngine();
 
     std::optional<Entity> register_entity();
-    void unregister_entity( Entity id );
+    void unregister_entity( const Entity id );
 
-    MovementComponent* get_movement_component( Entity id );
-    EnemyTypeComponent* get_enemy_type_component( Entity id );
-    DistanceComponent* get_distance_component( Entity id );
+    MovementComponent* get_movement_component( const Entity id ) const;
+    EnemyTypeComponent* get_enemy_type_component( const Entity id ) const;
+    DistanceComponent* get_distance_component( const Entity id ) const;
 
 private:
     std::queue<Entity> available_ids;

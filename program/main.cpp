@@ -11,7 +11,7 @@ Vec2 move_dir;
 int main() {
     window = new sf::RenderWindow(
         sf::VideoMode( WINDOW_WIDTH * 1.5, WINDOW_HEIGHT * 1.5 ),
-        "raycaster prototype" );
+        "custom project" );
 
     window->setMouseCursorGrabbed( true );
     window->setMouseCursorVisible( false );
