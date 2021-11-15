@@ -159,13 +159,84 @@ This hit a good balance, where the entities never ended up showing strange
 behaviour, but performance is hardly impacted due to how coarse the physics
 raycast calculations are.
 
-% not even sure if this will end up getting implemented, so put it on hold for
-% now
 \subsubsection{Collision Detection}
+Unfortunately, there was not much in the way of physics collision detection
+implemented into this project. Much of this comes down to problems with time
+constraints, as there has not been enough time to work it in, and the limited
+time I have had at my disposal caused me to make some poor decisions when it
+came to architecture which ended up not lending itself well to implementing
+even simple collision systems.
 
-% talk about how mutli-threading was implemented, what considerations had to be
-% made, and what implications it has
+Bar the previously mentioned physics raycasting for enemy movement, there is one
+other area where I have implemented collision detection: player movement.
+Well... In theory at least. The idea is that the player shouldn't be able to
+walk into walls (both because walls are solid, but also because it crashes the
+game) and this is achieved with the following code:
+
+\begin{verbatim}
+// in the update method
+if ( get_map_tile( int(player.position.x), int(old_pos.y) ) != Floor ) {
+    float wall_start = floor( player.position.x );
+    if ( move_vec.x < float(0) ) wall_start += 1.0;
+    else wall_start -= 0.05;
+    player.position.x += wall_start - player.position.x;
+}
+
+if ( get_map_tile( int(old_pos.x), int(player.position.y) ) != Floor ) {
+    float wall_start = floor( player.position.y );
+    if ( move_vec.y < 0 ) wall_start += 1.0;
+    else wall_start -= 0.05;
+    player.position.y += wall_start - player.position.y;
+}
+\end{verbatim}
+
+The idea is that when we move, we want to check if there's a wall where we have
+just tried to move. If there is, then we move the player back a small amount to
+ensure they don't go inside of the wall. Now this actually works excellently,
+but only without multi-threading. This is something that I have tried to resolve
+and have failed, even with my attempts to ensure that all resources in the hot
+path are locked with a mutex. It's really quite strange, but once again due to
+time constraints I was unable to do much more with it and had to cut my losses.
+
 \subsubsection{Multi-threading}
+Multi-threading is something that you see thrown around a lot as a way to get
+free or easy performance. Well, I'm happy to report that those people are big
+fat liars. There are many more complications that come along with implementing
+multi-threading into any application, and I encountered a fair few of these
+while working it into my current solution.
+
+For some context, the goal of this was to completely decouple the front end from
+the back end in such a way that they don't rely on each other executing in
+sequence. This allows for one or the other to complete their own loops without
+being blocked by the other, which is incredibly important for the front end to
+ensure that the application always feels responsive. The way that this was
+achieved was by first putting both parts of the program onto their own threads
+and then analysing what resources were being shared between the two threads.
+Anything that was being shared was then given a mutex to lock it so that all
+outputs of the code would still remain deterministic.
+
+In theory this should have preserved functionality, and it did for the most
+part. However, bugs still worked their way in and due to the nature of
+multi-threaded applications, they were incredibly hard to track down and fix.
+But that's perhaps not the worst part is that performance didn't get better--it
+actually got worse. Herein lies the crux of the problem with multi-threading:
+it's absolutely a powerful tool, but not the right choice for every application.
+The reason for this is while adding a new thread to your application absolutely
+frees up other threads to work, by virtue of how you have to ensure thread
+safety you may actually end up with the same issue I have had. This is because
+when adding a mutex, there is an associated overhead with managing it. To add
+to this, if you're not careful about using it only as needed then you may block
+other threads enough to defeat the purpose of the multiple threads. As a final
+nail in the coffin, every thread has the problem of overhead. In order to create
+and manage a thread there is an amount of memory and CPU time required. If you
+cannot offset this overhead with the performance gained from moving
+functionality to a new thread, then you're always going to have worse
+performance.
+
+So ultimately, the lesson to be learned here is that multi-threading is not a
+pancea. One must ensure they properly assess the benefits and drawbacks to
+multi-threading their application lest they end up with worse performance and
+more bugs than before.
 
 % explain what raycasters are, why they were created, and how they work. there
 % should be loads to talk about here!
