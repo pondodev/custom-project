@@ -440,6 +440,70 @@ progress, and there is only so much time to complete this project. Since it
 didn't pose any immediate problem with the performance of the project, I've
 left it like this in the final product.
 
+\subsection{Shaders}
+A big part of why I even looked at SFML in the first place is because of the
+shader pipeline--a feature that SDL completely lacked. You see, in graphical
+applications there is a need to communicate with graphics APIs such as OpenGL in
+order to create all the pretty pictures that you see on your screen. Working
+with raw OpenGL is pretty tough though, with much boilerplate needed before you
+can even draw a quad. It's why we have high level abstractions over such APIs
+like SDL or SFML--they make it significantly easier to create such applications.
+However, with abstraction comes a level of control lost, with the big thing
+often being granular control over the render pipeline.
+
+In short, a render pipeline is a series of tasks that we complete that will take
+in data such as vertices, transform data, normal maps, textures, etc and will
+create graphics on your screen. Some of the steps in this pipeline take in code
+that will run when data reaches that point of the pipeline, and that code is
+called a shader. There are many types of shaders available to a programmer, but
+the two main ones that you will see people using are vertex shaders and fragment
+shaders. For the sake of brevity I won't dig too deep into what they are (I
+leave that as an exercise to the reader!) but just know that they allow us to
+perform transforms on individual vertices and create cool visuals using lots of
+maths. In fact, anything that you see in games is almost certainly thanks to a
+shader doing a lot of heavy lifting.
+
+So as I alluded to before, there's no pipeline exposed to the programmer in SDL
+which is a real bummer because I really wanted to mess around with them
+(graphics programming is a passing interest of mine that I like to practice
+from time to time in my own game dev) and create some neat visual effects. SFML
+on the other hand provides a way for you to tap into it's pipeline to insert
+your own custom vertex and fragment shaders. This is something I intended to
+use to do... Something with. I wasn't ever really quite sure what, but I figured
+since I'm rendering to a target texture for the raycaster that I should be able
+to pass that texture through to a shader and perform some interesting post
+processing effects to it. There are a couple problems however.
+
+First problem is that when it comes to shaders, I'm far more accustomed to
+Unity's own ShaderLab which is a bit of a syntactical wrapper around HLSL code.
+HLSL is the shader language of choice when working with DirectX (though Unity
+will transpile it to other languages depending on the target platform) which is
+a Windows only graphics API. OpenGL on the other hand uses GLSL for it's own
+shader language, which actually is not too dissimilar to HLSL in many ways
+(except the clamp function is called saturate in HLSL and I still don't know
+why. I'm told it's a maths thing but maths is silly so it's wrong). Me being on
+Linux, I couldn't use DirectX so OpenGL was the only other feasible option. Now,
+this isn't my first rodeo with GLSL--I actually learned OpenGL before I did any
+shader work with Unity. My problem however is that I have spent far more time
+with ShaderLab and HLSL, so I'm rather used to that pipeline as a result. This
+meant there's a fair bit of learning that needed to happen on my end.
+
+Second problem is that SFML's OpenGL context targets something like OpenGL 2.x,
+which is actually a lot lower than most people target. Most people will target
+OpenGL 3.3 core since this is considered the baseline for modern OpenGL. Add to
+this that many GPUs support 3.3 core, it makes for an easy choice when picking
+a version and profile to target. OpenGL 2.x isn't impossible to work with, not
+by any stretch, however it's really quite different to 3.3 core in a lot of ways
+that I wasn't able to really wrap my head around. Considering that I already had
+to learn compute shaders in 4.3 core, learning another version and profile just
+felt too far out of scope.
+
+So ultimately, I ran out of time to dive into it like I wanted to. It's worth
+noting that if I wanted to, then I could have created my own gl context and set
+my own gl version within SFML, but then I would have needed to write my own
+abstractions to perform the tasks that I had already achieved in SFML. At this
+point it was a lost cause, so I had to cut the feature.
+
 \section{Conclusion}
 This has been an incredibly interesting journey for me, one with many twists and
 turns and equal amounts of lessons learned. I've covered a large swathe of
