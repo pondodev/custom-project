@@ -238,9 +238,69 @@ pancea. One must ensure they properly assess the benefits and drawbacks to
 multi-threading their application lest they end up with worse performance and
 more bugs than before.
 
-% explain what raycasters are, why they were created, and how they work. there
-% should be loads to talk about here!
 \subsubsection{Raycaster}
+Now for the moment (I hope) you've all been waiting for--raycasting! I need to
+get this out of the way before I say too much more: I \textit{love} raycasters.
+I think they're some of the coolest ways we "hacked" graphics in the days of
+yore, and as such you'll probably find me gushing fairly frequently about just
+how cool I think they are. Sorry about that in advance.
+
+So I suppose the next thing to explain is what raycasters are, and why they
+exist. In simple terms, raycasters are a way for us to cheat perspective to
+create 3D-like environments. To explain how it achieves this, we should explore
+how graphics works at a high level first.
+
+In modern graphics APIs (such as OpenGL) we have what is called a graphics
+pipeline. This pipeline is made up of individual steps that we pass data through
+in order to process it into the pretty visuals we see on our screen. Each of
+these steps contains discrete programs which we call shaders, and of note to us
+is a specific shader called the fragment shader. Once all the processing on
+vertices, normals, etc is done by previous shaders we are now ready to render
+our fragments. For our purposes you can simply think of a fragment as a pixel on
+your screen. Now imagine that for each fragment, we need to perform a
+calculation--on a 1920x1080 screen (a standard full HD display resolution) this
+means you have to make 2,073,600 calculations. To keep your computer feeling
+responsive you need to make sure that these calculations are done multiple times
+a second, which could bring up the calculations per second by a factor of 60.
+This is a lot of calculations! But our modern PCs with their very, very fancy
+GPUs are able to perform many of these calculations in parallel very, very
+quickly which allows our CPU to do other stuff while the PC still looks and
+feels responsive.
+
+Old PCs weren't like this however. If they did have a GPU, it certainly wasn't
+able to perform this many discrete calculations at such a speed as to make true
+3D graphics feasible. The raycaster gets around this with a very clever trick:
+only perform discrete calculations for every vertical scanline. This means that
+on our 1920x1080 screen, instead of you doing some 2 million calculations you
+are now only doing 1920--significantly less! So how does it achieve this? Well,
+buckle up because there's a fair bit of maths involved. Don't worry though! I'm
+really bad at maths so I'll be explaining things in simple terms as much as I
+can, since that's how I understand them (at a high level, anyway).
+
+The first thing we start with is the top down 2D projection of the map that we
+wish to project with 3D perspective. This becomes our game world, and is
+actually what one might consider as the "real" world. This makes operating on
+entities in game incredibly easy since they're all entirely within 2D space.
+Next we place the player into the world and give them a viewing angle and cone.
+This cone will define where all raycasts are made. Now for the magic: we take
+the two extremes of the cone and through linear interpolation cast exactly as
+many rays as there are pixels horizontally in our render target. For each of
+these rays we calculate the distance between the player and the raycast hit.
+Depending on how far the hit was, we now draw a vertical bar on the render
+target at the appropriate vertical scanline--the closer the hit the larger the
+bar, and the further away the hit the smaller the bar. What we've now created
+is a really good, simple 3D projection that is incredibly performant and easy to
+work with.
+
+Now if we want to add entities to the game, it's more or less the same idea
+except now we will be simply calculating the distance between each enemy and the
+player. The further away the entity is, the smaller the sprite drawn will end up
+being. And that's the bulk of the actual code! There are some more things to it
+such as depth testing (which will be talked about later) and lens correction
+which I won't really talk about here if only for the sake of brevity, but
+suffice to say that this is an incredibly clever and high performance way to
+create 3D graphics in games, during a time where such graphics were basically
+unheard of.
 
 \section{Challenges}
 This has been an absolutely enormous project, one that has spanned months at the
