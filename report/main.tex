@@ -311,6 +311,54 @@ reader I have detailed what they were, why they were problems, and how I did or
 didn't manage to resolve them.
 
 \subsection{Raycaster Depth Testing}
+Depth testing is a very, very large topic in graphics programming but is still
+generally simple enough. The idea is that when we draw something to the screen,
+we also want to write a value to the depth buffer. This value is simply how far
+whatever was drawn at that pixel is from the camera. What this allows us to do
+is perform a depth test on all subsequent draws to see if what we are trying to
+draw is in front of or behind something we just drew. This allows us to ensure
+that whenever we draw things to the screen, something that is behind another
+thing will not get drawn on top.
+
+Since this is a 3D application, there is a simple depth buffer implemented.
+Recall that raycasters work entirely on vertical scanlines, which means that our
+depth buffer will also work on these vertical scanlines.The process of using
+this depth buffer goes as follows:
+
+\begin{itemize}
+    \item Draw the walls in the scene, writing it's distance to the depth buffer
+    \item Draw each entity in the scene, culling scanlines if a depth test shows it behind a wall
+\end{itemize}
+
+This is imperfect as a solution however, and that's because entities may be
+drawn on top of each other. You might assume that we can simply write to the
+depth buffer as we have already done for the walls, and this does actually work!
+But now we have a new kind of issue: transparency. Textures and sprites are not 
+columns of a single colour, so when we draw them we need to sample them. Wall
+textures are fairly trivial in this regard since we know that they're always
+going to be solid with no transparency, so we always draw every pixel of the
+texture. Sprites for the entities are a little bit more complicated however, and
+this is because they can and do include transparency. Now, the way transparency
+is handled in this very simple (in graphics APIs like OpenGL it can get far more
+complicated with blend modes and render queues) since all we do is check if
+something is transparent at all or not, no translucency is handled. However,
+this transparency testing is only done during the sampling of the sprite, there
+is no information about it written into the depth buffer.
+
+We could attempt to ensure that all sprites are written to the depth buffer, and
+that any transparency is ignored and not written to the depth buffer. This only
+works to a point however, because if you recall the depth buffer is only
+tracking values for every scanline and there are absolutely cases where a
+scanline can be partially transparent. There are many methods to achieve this
+kind of depth testing to ensure that sprites are rendered in the correct order,
+but I have opted for a brute force method: rendering the entities in ascending
+order of distance. This means that the entities which are furthest away from the
+player will get rendered first and the closest will be rendered last. This works
+simply because anything in front of other entities will just render over it.
+It's of course not ideal--we're running a sorting algorithm every frame and
+we're wasting resources on rendering more than we can see. A lot of CPU time
+gets wasted this way, but it's easy to implement and absolutely works
+brilliantly.
 
 \subsection{Mouse Looking}
 With the way that the raycaster had been written, changing the player's view
