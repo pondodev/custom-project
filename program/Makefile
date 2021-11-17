@@ -6,6 +6,7 @@ fullclean: clean build run
 
 build:
 		g++ -o $(executable_name) *.cpp \
+			-O3 \
 			-std=c++17 \
 			-lpthread \
 			-lsfml-graphics \
