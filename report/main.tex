@@ -6,7 +6,7 @@
 
 \title{COS30031 Games Programming\\Custom Project Report}
 \author{Daniel Coady 102084174}
-\date{04/11/2021}
+\date{17/11/2021}
 
 \begin{document}
 
@@ -66,6 +66,8 @@ some simple collision detection. The entire project has been written in C++
 within a Linux environment using the gcc toolchain, and borrows greatly both
 from Austin Morlan's writeup on ECS\footnote{https://austinmorlan.com/posts/entity\_component\_system/}
 and Dmitry V. Sokolov's tinyraycaster series of tutorials\footnote{https://github.com/ssloy/tinyraycaster/wiki/Part-0:-getting-started}.
+All code for this project will be available on GitHub\footnote{https://github.com/pondodev/custom-project}
+under the Unlicense License.
 
 \section{Implementation}
 
@@ -93,17 +95,15 @@ my opinion, slightly better) to SDL's own event system, and it just made sense
 for the purposes of my project.
 
 There is another option however, one that I think might have made more sense for
-this project actually: raw OpenGL. It's a scary prospect, for sure, but there's
-a big benefit in the form of performance that we would have gained. There is of
-course some added complexity that would come from this since we're essentially
-working with little to no abstractions. However, considering that there isn't
-much we need from SFML outside of the events system and drawing textures to a
-quad, it would have been decently trivial to make the change over to raw OpenGL.
+this project: raw OpenGL. It's a scary prospect, for sure, but there's a big
+benefit in the form of performance that we would have gained. There is of course
+some added complexity that would come from this since we're essentially working
+with little to no abstractions. However, considering that there isn't much we
+need from SFML outside of the events system and drawing textures to a quad, it
+would have been decently trivial to make the change over to raw OpenGL.
 
 \subsection{Back End}
 
-% talk about ecs, why it was chosen to write the enemy ai, and how it was
-% implemented
 \subsubsection{Enemy AI}
 Enemies are all treated as entities in an Entity Component System, or ECS for
 short. This is quite a simplified version of ECS, as it only need serve one
@@ -121,14 +121,8 @@ render system, and the enemy behaviour system. The render system is fairly
 uninteresting as all it does is read the components for each entity to render
 them accordingly. The enemy behaviour system on the other hand is far, far more
 interesting. This system, as the name would imply, is where all of the actual
-AI for each enemy lives.
-
-The enemy AI is incredibly simple, as it exhibits only two behaviours:
-
-\begin{itemize}
-    \item Chasing the player
-    \item Waiting to see the player
-\end{itemize}
+AI for each enemy lives. The enemy AI is incredibly simple, as it exhibits only
+two behaviours: chasing the player and waiting to see the player.
 
 Chasing the player is fairly simple: calculate the unit vector pointing towards
 the player, then add that vector to the current position scaling by speed and
